@@ -1,4 +1,4 @@
 Navigation
 ==========
 
-A plugin to help render navigation elements consistently.
+A simple plugin to help render navigation elements consistently.
