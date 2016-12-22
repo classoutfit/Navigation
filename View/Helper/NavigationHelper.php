@@ -243,18 +243,18 @@ class NavigationHelper extends AppHelper {
             'save',
             $menuOptions,
             'submit',
-            'icon-save',
+            'fa fa-save',
             'Save',
             $class = 'btn btn-success'
         );
-        $this->__addActionLink('modal_cancel', $menuOptions, $prefix, 'index', null, 'icon-undo', 'Cancel');
-        $this->__addActionLink('cancel_add', $menuOptions, $prefix, 'index', null, 'icon-undo', 'Cancel');
-        $this->__addActionLink('cancel_edit', $menuOptions, $prefix, 'view', $menuOptions['id'], 'icon-undo', 'Cancel');
-        $this->__addActionLink('view', $menuOptions, $prefix, 'view', $menuOptions['id'], 'icon-zoom-in', 'View');
-        $this->__addActionLink('edit', $menuOptions, $prefix, 'edit', $menuOptions['id'], 'icon-edit', 'Edit');
-        $this->__addActionLink('delete', $menuOptions, $prefix, 'delete', $menuOptions['id'], 'icon-cut', 'Delete', 'Are you sure you want to delete '.$menuOptions['title'].'?', true);
-        $this->__addActionLink('index', $menuOptions, $prefix, 'index', $menuOptions['id'], 'icon-list', 'List all');
-        $this->__addActionLink('add', $menuOptions, $prefix, 'add', $menuOptions['id'], 'icon-plus-sign', 'Add a new ' . $menuOptions['name']);
+        $this->__addActionLink('modal_cancel', $menuOptions, $prefix, 'index', null, 'fa fa-undo', 'Cancel');
+        $this->__addActionLink('cancel_add', $menuOptions, $prefix, 'index', null, 'fa fa-undo', 'Cancel');
+        $this->__addActionLink('cancel_edit', $menuOptions, $prefix, 'view', $menuOptions['id'], 'fa fa-undo', 'Cancel');
+        $this->__addActionLink('view', $menuOptions, $prefix, 'view', $menuOptions['id'], 'fa fa-zoom', 'View');
+        $this->__addActionLink('edit', $menuOptions, $prefix, 'edit', $menuOptions['id'], 'fa fa-edit', 'Edit');
+        $this->__addActionLink('delete', $menuOptions, $prefix, 'delete', $menuOptions['id'], 'fa fa-delete', 'Delete', 'Are you sure you want to delete '.$menuOptions['title'].'?', true);
+        $this->__addActionLink('index', $menuOptions, $prefix, 'index', $menuOptions['id'], 'fa fa-list', 'List all');
+        $this->__addActionLink('add', $menuOptions, $prefix, 'add', $menuOptions['id'], 'fa fa-plus-square', 'Add a new ' . $menuOptions['name']);
 
         $output = '';
 

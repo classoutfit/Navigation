@@ -3,12 +3,12 @@
     <ul class="pagination">
         <?php
             echo $this->Paginator->first(
-                '<i class="icon-fast-backward"></i>',
+                '<i class="fa fa-fast-backward"></i>',
                 [
                     'escape' => false,
                     'tag' => 'li'
                 ],
-                '<a onclick="return false;"><i class="icon-fast-backward"></i></a>',
+                '<a onclick="return false;"><i class="fa fa-fast-backward"></i></a>',
                 [
                     'class' => 'disabled',
                     'escape' => false,
@@ -17,12 +17,12 @@
             );
 
             echo $this->Paginator->prev(
-                '<i class="icon-step-backward"></i>',
+                '<i class="fa fa-step-backward"></i>',
                 [
                     'escape' => false,
                     'tag' => 'li',
                 ],
-                '<a onclick="return false;"><i class="icon-step-backward"></i></a>',
+                '<a onclick="return false;"><i class="fa fa-step-backward"></i></a>',
                 [
                     'class' => 'disabled',
                     'escape' => false,
@@ -41,12 +41,12 @@
             );
 
             echo $this->Paginator->next(
-                '<i class="icon-step-forward"></i>',
+                '<i class="fa fa-step-forward"></i>',
                 [
                     'escape' => false,
                     'tag' => 'li'
                 ],
-                '<a onclick="return false;"><i class="icon-step-forward"></i></a>',
+                '<a onclick="return false;"><i class="fa fa-step-forward"></i></a>',
                 [
                     'class' => 'disabled',
                     'escape' => false,
@@ -54,12 +54,12 @@
                 ]
             );
             echo $this->Paginator->last(
-                '<i class="icon-fast-forward"></i>',
+                '<i class="fa fa-fast-forward"></i>',
                 [
                     'escape' => false,
                     'tag' => 'li'
                 ],
-                '<a onclick="return false;"><i class="icon-fast-forward"></i></a>',
+                '<a onclick="return false;"><i class="fa fa-fast-forward"></i></a>',
                 [
                     'class' => 'disabled',
                     'escape' => false,
