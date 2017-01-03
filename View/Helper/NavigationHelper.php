@@ -1,5 +1,4 @@
 <?php
-
 class NavigationHelper extends AppHelper {
 
     var $helpers = ['Html', 'Form', 'Session'];
@@ -18,12 +17,14 @@ class NavigationHelper extends AppHelper {
             return '';
         }
 
-        $params = isset($menuOptons['params'])
+        $this->params = isset($menuOptons['params'])
             ? $menuOptons['params']
-            : $this->request->params
+            : $this->params
         ;
 
-        $this->setActiveTab($menuOptions);
+        $this->menuOptions = $menuOptions;
+
+        $this->setActiveTab();
 
         $output = '';
 
@@ -35,15 +36,15 @@ class NavigationHelper extends AppHelper {
         foreach ($this->menu as $menuItemName => $menuItem) {
 
             if (! isset($menuItem['Auth'][$roleId]) || $menuItem['Auth'][$roleId] != 'deny') {
-                if (isset($menuOptions['prefix'])) {
-                    $menuItem['text'] = $menuOptions['prefix'].$menuItem['text'];
+                if (isset($this->menuOptions['prefix'])) {
+                    $menuItem['text'] = $this->menuOptions['prefix'].$menuItem['text'];
                 }
-                if (isset($menuOptions['data'])) {
-                    foreach ($menuOptions['data'] as $field => $value) {
+                if (isset($this->menuOptions['data'])) {
+                    foreach ($this->menuOptions['data'] as $field => $value) {
                         $menuItem['text'] = str_replace('{'.$field.'}', $value, $menuItem['text']);
                     }
                 }
-                if (isset($menuOptions['tag'])) {
+                if (isset($this->menuOptions['tag'])) {
                     if (isset($menuItem['dropdown'])) {
                         if (isset($menuItem['tag_options']['class'])) {
                             $menuItem['tag_options']['class'] .= ' dropdown';
@@ -52,18 +53,17 @@ class NavigationHelper extends AppHelper {
                         }
 
                         $output .= $this->Html->tag(
-                            $menuOptions['tag'],
+                            $this->menuOptions['tag'],
                             $this->dropdown(
                                 $menuItem['text'],
-                                $menuItem['dropdown'],
-                                $params
+                                $menuItem['dropdown']
                             ),
                             $menuItem['tag_options']
                         );
 
                     } else {
                         $output .= $this->Html->tag(
-                            $menuOptions['tag'],
+                            $this->menuOptions['tag'],
                             $this->Html->link(
                                 $menuItem['text'],
                                 $menuItem['url'],
@@ -89,10 +89,10 @@ class NavigationHelper extends AppHelper {
         return $output;
     }
 
-    private function setActiveTab($menuOptions = [])
+    private function setActiveTab()
     {
-        $active = isset($menuOptions['active'])
-            ? $menuOptions['active']
+        $active = isset($this->menuOptions['active'])
+            ? $this->menuOptions['active']
             : null
         ;
 
@@ -100,42 +100,32 @@ class NavigationHelper extends AppHelper {
             return true;
         }
 
-        $prefix = isset($this->request->params['prefix']) && $this->request->params['prefix']
-            ? $this->request->params['prefix']
-            : null
-        ;
-
-        $param = isset($this->request->params['pass'][0])
-            ? $this->request->params['pass'][0]
-            : null
-        ;
-
         $activeTabs = [];
 
-        if ($prefix) {
-            if ($param) {
-                $activeTabs[] = $prefix.'/'.$this->request->params['controller'].'/'.$this->request->params['action'].'/'.$param;
+        if (! empty($this->menuOptions['prefix'])) {
+            if (! empty($this->menuOptions['id'])) {
+                $activeTabs[] = $this->menuOptions['prefix'] . '/'. $this->params['controller'] . '/' . $this->params['action'] . '/' . $this->menuOptions['id'];
             }
             $activeTabs = array_merge(
                 $activeTabs,
                 [
-                    $prefix.'/'.$this->request->params['controller'].'/'.$this->request->params['action'],
-                    $prefix.'/'.$this->request->params['controller'],
-                    $prefix.'/'.$this->request->params['action']
+                    $this->menuOptions['prefix'].'/'.$this->params['controller'].'/'.$this->params['action'],
+                    $this->menuOptions['prefix'].'/'.$this->params['controller'],
+                    $this->menuOptions['prefix'].'/'.$this->params['action']
                 ]
             );
         }
 
-        if ($param) {
-            $activeTabs[] = $this->request->params['controller'].'/'.$this->request->params['action'].'/'.$this->request->params['pass'][0];
+        if (! empty($this->menuOptions['id'])) {
+            $activeTabs[] = $this->params['controller'].'/'.$this->params['action'].'/'.$this->params['pass'][0];
         }
 
         $activeTabs = array_merge(
             $activeTabs,
             [
-                $this->request->params['controller'].'/'.$this->request->params['action'],
-                $this->request->params['controller'],
-                $this->request->params['action']
+                $this->params['controller'].'/'.$this->params['action'],
+                $this->params['controller'],
+                $this->params['action']
             ]
         );
 
@@ -186,27 +176,21 @@ class NavigationHelper extends AppHelper {
 
     public function actions($menuOptions = [])
     {
+        $defaults = [
+            'id' => null,
+            'title' => null,
+            'name'  => null,
+            'blackList' => [],
+            'whiteList' => [],
+            'prefix' => null,
+            'controller' => $this->params['controller'],
+            'style' => 'form-actions'
+        ];
+
         $menuOptions = array_merge(
-            [
-                'id' => isset($this->params['pass'][0])
-                    ? $this->params['pass'][0]
-                    : null
-                ,
-                'title' => null,
-                'name'  => null,
-                'blackList' => [],
-                'whiteList' => [],
-                'controller' => $this->params['controller'],
-                'style' => 'form-actions'
-            ],
+            $defaults,
             $menuOptions
         );
-
-        if (isset($menuOptions['prefix'])) {
-            $prefix = $menuOptions['prefix'];
-        } else {
-            $prefix = null;
-        }
 
         if (in_array($menuOptions['style'], ['form-actions', 'buttonbar'])) {
             $menuOptions['linkClass'] = 'btn';
@@ -236,55 +220,103 @@ class NavigationHelper extends AppHelper {
             'modal_cancel' => 0
         ];
 
+        $this->menuOptions = $menuOptions;
         $output = '';
-        $this->__actions = [];
+        $this->navActions = [];
 
-        $this->__addActionButton(
+        $this->addActionButton(
             'save',
-            $menuOptions,
             'submit',
             'fa fa-save',
             'Save',
             $class = 'btn btn-success'
         );
-        $this->__addActionLink('modal_cancel', $menuOptions, $prefix, 'index', null, 'fa fa-undo', 'Cancel');
-        $this->__addActionLink('cancel_add', $menuOptions, $prefix, 'index', null, 'fa fa-undo', 'Cancel');
-        $this->__addActionLink('cancel_edit', $menuOptions, $prefix, 'view', $menuOptions['id'], 'fa fa-undo', 'Cancel');
-        $this->__addActionLink('view', $menuOptions, $prefix, 'view', $menuOptions['id'], 'fa fa-zoom', 'View');
-        $this->__addActionLink('edit', $menuOptions, $prefix, 'edit', $menuOptions['id'], 'fa fa-edit', 'Edit');
-        $this->__addActionLink('delete', $menuOptions, $prefix, 'delete', $menuOptions['id'], 'fa fa-delete', 'Delete', 'Are you sure you want to delete '.$menuOptions['title'].'?', true);
-        $this->__addActionLink('index', $menuOptions, $prefix, 'index', $menuOptions['id'], 'fa fa-list', 'List all');
-        $this->__addActionLink('add', $menuOptions, $prefix, 'add', $menuOptions['id'], 'fa fa-plus-square', 'Add a new ' . $menuOptions['name']);
+        $this->addActionLink([
+            'action' => 'modal_cancel',
+            'targetAction' => 'index',
+            'icon' => 'fa fa-undo',
+            'text' => 'Cancel'
+        ]);
+        $this->addActionLink([
+            'action' => 'cancel_add',
+            'targetAction' => 'index',
+            'icon' => 'fa fa-undo',
+            'text' => 'Cancel'
+        ]);
+        $this->addActionLink([
+            'action' => 'cancel_edit',
+            'targetAction' => 'view',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-undo',
+            'text' => 'Cancel'
+        ]);
+        $this->addActionLink([
+            'action' => 'view',
+            'targetAction' => 'view',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-zoom',
+            'text' => 'View'
+            ]);
+        $this->addActionLink([
+            'action' => 'edit',
+            'targetAction' => 'edit',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-edit',
+            'text' => 'Edit'
+            ]);
+        $this->addActionLink([
+            'action' => 'delete',
+            'targetAction' => 'delete',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-trash',
+            'text' => 'Delete',
+            'confirmText' => 'Are you sure you want to delete ' . $this->menuOptions['title'] . '?',
+            'postLink' => true
+        ]);
+        $this->addActionLink([
+            'action' => 'index',
+            'targetAction' => 'index',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-list',
+            'text' => 'List all'
+        ]);
+        $this->addActionLink([
+            'action' => 'add',
+            'targetAction' => 'add',
+            'id' => $this->menuOptions['id'],
+            'icon' => 'fa fa-plus-square',
+            'text' => 'Add a new ' . $this->menuOptions['name']
+        ]);
 
         $output = '';
 
-        if ($this->__actions) {
+        if ($this->navActions) {
 
-            switch ($menuOptions['style']) {
+            switch ($this->menuOptions['style']) {
                 case 'form-actions':
                     $output = '<div class="form-actions"><div class="btn-group">';
-                        foreach ($this->__actions as $action) {
+                        foreach ($this->navActions as $action) {
                             $output .= $action;
                         }
                     $output .= '</div></div>';
                     break;
                 case 'buttonbar':
                     $output = '<div class="btn-group">';
-                        foreach ($this->__actions as $action) {
+                        foreach ($this->navActions as $action) {
                             $output .= $action;
                         }
                     $output .= '</div>';
                     break;
                 case 'pills':
                     $output = '<ul class="nav nav-pills nav-pills-actions">';
-                        foreach ($this->__actions as $action) {
+                        foreach ($this->navActions as $action) {
                             $output .= '<li>' . $action . '</li>';
                         }
                     $output .= '</ul>';
                     break;
                 case 'links';
                 case 'icon':
-                    foreach ($this->__actions as $action) {
+                    foreach ($this->navActions as $action) {
                         $output .= $action;
                     }
                     break;
@@ -295,58 +327,83 @@ class NavigationHelper extends AppHelper {
         return $output;
     }
 
-    private function __addActionLink($action, $menuOptions = [], $prefix = null, $targetAction, $id = null, $icon, $text, $promptText = null, $postLink = false)
+    /**
+     * Adds a link to the $actions array
+     * @param array $options Options that define the link
+     * -- action                The action of the link
+     * -- targetAction          The target action of the link
+     * -- id = null             An id to be included in a link
+     * -- icon                  An icon to be displayed in the link
+     * -- text                  The text to be displayed on the link
+     * -- promptText = null     Any prompt text for confirming the action of the link
+     * -- postLink = false      Determines is this is a postLink or not
+     */
+    private function addActionLink($options = [])
     {
+        $defaults = [
+            'id' => null,
+            'promptText' => null,
+            'postLink' => false,
+            'linkClass' => 'btn btn-default'
+        ];
 
-        if ($this->includeLink($action, $menuOptions)) {
-            $url = [
-                'controller' => $menuOptions['controller'],
-                'action' => $targetAction,
-                $id
-            ];
-            if ($prefix) {
-                $url[$prefix] = true;
-            }
-            if ($postLink) {
-                $this->__actions[] = $this->Form->postLink(
+        $options = array_merge($defaults, $options);
+
+        extract($options);
+
+        if (! $this->includeLink($action, $this->menuOptions)) {
+            return;
+        }
+
+        $url = [
+            'controller' => $this->menuOptions['controller'],
+            'action' => $targetAction,
+            $id
+        ];
+
+        if ($this->menuOptions['prefix']) {
+            $url[$this->menuOptions['prefix']] = true;
+        }
+
+        if ($postLink) {
+            $this->navActions[] = $this->Form->postLink(
+                '<i class="' . $icon . '"></i> ' . $text,
+                $url,
+                [
+                    'escape' => false,
+                    'class' => $linkClass
+                ],
+                $promptText
+            );
+        } else {
+            if ($action == 'modal_cancel') {
+                $this->navActions[] = $this->Form->button(
+                    'Cancel',
+                    [
+                        'type' => 'button',
+                        'class' => 'btn btn-default',
+                        'data-dismiss' => 'modal'
+                    ]
+                );
+            } else {
+                $this->navActions[] = $this->Html->link(
                     '<i class="' . $icon . '"></i> ' . $text,
                     $url,
                     [
                         'escape' => false,
-                        'class' => $menuOptions['linkClass']
+                        'class' => $linkClass
                     ],
                     $promptText
                 );
-            } else {
-                if ($action == 'modal_cancel') {
-                    $this->__actions[] = $this->Form->button(
-                        'Cancel',
-                        [
-                            'type' => 'button',
-                            'class' => 'btn btn-default',
-                            'data-dismiss' => 'modal'
-                        ]
-                    );
-                } else {
-                    $this->__actions[] = $this->Html->link(
-                        '<i class="' . $icon . '"></i> ' . $text,
-                        $url,
-                        [
-                            'escape' => false,
-                            'class' => $menuOptions['linkClass']
-                        ],
-                        $promptText
-                    );
-                }
-
             }
+
         }
     }
 
-    private function __addActionButton($action, $menuOptions = [], $type = 'submit', $icon, $text, $class = 'btn')
+    private function addActionButton($action, $type = 'submit', $icon, $text, $class = 'btn')
     {
-        if ($this->includeLink($action, $menuOptions)) {
-            $this->__actions[] = $this->Form->button(
+        if ($this->includeLink($action, $this->menuOptions)) {
+            $this->navActions[] = $this->Form->button(
                 '<i class="' . $icon . '"></i> ' . $text,
                 [
                     'type' => $type,
@@ -392,7 +449,7 @@ class NavigationHelper extends AppHelper {
 
     }
 
-    private function dropdown($text, $dropdown, $params)
+    private function dropdown($text, $dropdown)
     {
         $output = '<a href="#" class="dropdown-toggle" data-toggle="dropdown">' . $text . ' <b class="caret"></b></a>';
         $output .= '<ul class="dropdown-menu" role="menu">';
@@ -400,16 +457,6 @@ class NavigationHelper extends AppHelper {
         $output .= '</ul>';
 
         return $output;
-
-        return $this->Html->link(
-            $text . '<b class="caret"></b><ul class="dropdown-menu" role="menu">'.$this->menu($dropdown).'</ul>',
-            '#',
-            [
-                'class' => 'dropdown-toggle',
-                'data-toggle' => 'dropdown',
-                'escape' => false
-            ]
-        );
     }
 
     private function divider()
