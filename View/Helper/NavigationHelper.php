@@ -261,14 +261,14 @@ class NavigationHelper extends AppHelper {
             'action' => 'edit',
             'targetAction' => 'edit',
             'id' => $this->menuOptions['id'],
-            'icon' => 'fa fa-edit',
+            'icon' => 'fa fa-pencil',
             'text' => 'Edit'
             ]);
         $this->addActionLink([
             'action' => 'delete',
             'targetAction' => 'delete',
             'id' => $this->menuOptions['id'],
-            'icon' => 'fa fa-trash',
+            'icon' => 'fa fa-trash-o',
             'text' => 'Delete',
             'confirmText' => 'Are you sure you want to delete ' . $this->menuOptions['title'] . '?',
             'postLink' => true
