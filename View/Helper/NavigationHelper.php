@@ -254,15 +254,17 @@ class NavigationHelper extends AppHelper {
             'action' => 'view',
             'targetAction' => 'view',
             'id' => $this->menuOptions['id'],
-            'icon' => 'fa fa-zoom',
-            'text' => 'View'
+            'icon' => 'fa fa-search-plus',
+            'text' => 'View',
+            'linkClass' => 'btn btn-default btn-xs'
             ]);
         $this->addActionLink([
             'action' => 'edit',
             'targetAction' => 'edit',
             'id' => $this->menuOptions['id'],
             'icon' => 'fa fa-pencil',
-            'text' => 'Edit'
+            'text' => 'Edit',
+            'linkClass' => 'btn btn-default btn-xs'
             ]);
         $this->addActionLink([
             'action' => 'delete',
@@ -271,7 +273,8 @@ class NavigationHelper extends AppHelper {
             'icon' => 'fa fa-trash-o',
             'text' => 'Delete',
             'confirmText' => 'Are you sure you want to delete ' . $this->menuOptions['title'] . '?',
-            'postLink' => true
+            'postLink' => true,
+            'linkClass' => 'btn btn-default btn-xs'
         ]);
         $this->addActionLink([
             'action' => 'index',
@@ -314,8 +317,7 @@ class NavigationHelper extends AppHelper {
                         }
                     $output .= '</ul>';
                     break;
-                case 'links';
-                case 'icon':
+                default:
                     foreach ($this->navActions as $action) {
                         $output .= $action;
                     }
