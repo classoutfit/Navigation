@@ -15,9 +15,7 @@
         }
     ],
     "require": {
-        "cakephp/cakephp": "~2.8",
-        "php": "^5.6",
-        "composer/installers": "*"
+        "php": ">=5.6"
     },
     "extra": {
         "installer-name": "Navigation"
